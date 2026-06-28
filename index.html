@@ -12,12 +12,24 @@
     #mensaje { font-size: 36px; font-weight: bold; color: #4FC3F7; margin: 30px; }
     #historial { text-align: left; max-width: 500px; margin: 0 auto; }
     .msg { background: #0f3460; padding: 10px; margin: 5px; border-radius: 6px; }
+    .botones { margin: 30px; }
+    .btn-on { background: #1B5E20; color: white; padding: 15px 40px; font-size: 20px; border: none; border-radius: 10px; cursor: pointer; margin: 10px; }
+    .btn-off { background: #B71C1C; color: white; padding: 15px 40px; font-size: 20px; border: none; border-radius: 10px; cursor: pointer; margin: 10px; }
+    #estadoLED { font-size: 24px; margin: 20px; }
   </style>
 </head>
 <body>
-  <h1>🖥️ Mi Servidor (Proyecto de Fiti)</h1>
+  <h1>🖥️ Mi Servidor (Proyecto Fiti)</h1>
   <div id="estado" class="desconectado">⚫ Desconectado</div>
   <div id="mensaje">Esperando mensaje...</div>
+
+  <div class="botones">
+    <h2>Control LED ESP32</h2>
+    <button class="btn-on" onclick="controlLED('on')">💡 Encender LED</button>
+    <button class="btn-off" onclick="controlLED('off')">🌑 Apagar LED</button>
+    <div id="estadoLED">LED: Apagado</div>
+  </div>
+
   <h3>Historial:</h3>
   <div id="historial"></div>
 
@@ -32,17 +44,3 @@
 
     socket.on('disconnect', () => {
       document.getElementById('estado').className = 'desconectado';
-      document.getElementById('estado').innerHTML = '⚫ Desconectado';
-    });
-
-    socket.on('mensaje', (data) => {
-      document.getElementById('mensaje').innerHTML = data;
-      const historial = document.getElementById('historial');
-      const div = document.createElement('div');
-      div.className = 'msg';
-      div.innerHTML = '📨 ' + data;
-      historial.prepend(div);
-    });
-  </script>
-</body>
-</html>
