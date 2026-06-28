@@ -6,9 +6,7 @@
   <style>
     body { font-family: Arial; background: #1a1a2e; color: white; text-align: center; padding: 40px; }
     h1 { color: #4FC3F7; }
-    #estado { font-size: 20px; margin: 20px; padding: 10px; border-radius: 8px; }
-    .conectado { background: #1B5E20; }
-    .desconectado { background: #B71C1C; }
+    #estado { font-size: 20px; margin: 20px; padding: 10px; border-radius: 8px; background: #1B5E20; }
     #mensaje { font-size: 36px; font-weight: bold; color: #4FC3F7; margin: 30px; }
     #historial { text-align: left; max-width: 500px; margin: 0 auto; }
     .msg { background: #0f3460; padding: 10px; margin: 5px; border-radius: 6px; }
@@ -20,7 +18,7 @@
 </head>
 <body>
   <h1>🖥️ Mi Servidor (Proyecto Fiti)</h1>
-  <div id="estado" class="desconectado">⚫ Desconectado</div>
+  <div id="estado">🟢 Conectado al servidor</div>
   <div id="mensaje">Esperando mensaje...</div>
 
   <div class="botones">
@@ -33,14 +31,34 @@
   <h3>Historial:</h3>
   <div id="historial"></div>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io();
+    // Revisa mensajes cada 2 segundos
+    setInterval(() => {
+      fetch('/ultimoMensaje')
+        .then(res => res.json())
+        .then(data => {
+          if (data.mensaje) {
+            document.getElementById('mensaje').innerHTML = data.mensaje;
+          }
+          if (data.led) {
+            document.getElementById('estadoLED').innerHTML = 
+              data.led === 'LED_ON' ? '💡 LED: Encendido' : '🌑 LED: Apagado';
+          }
+        })
+        .catch(() => {
+          document.getElementById('estado').innerHTML = '⚫ Desconectado';
+          document.getElementById('estado').style.background = '#B71C1C';
+        });
+    }, 2000);
 
-    socket.on('connect', () => {
-      document.getElementById('estado').className = 'conectado';
-      document.getElementById('estado').innerHTML = '🟢 Conectado al servidor';
-    });
-
-    socket.on('disconnect', () => {
-      document.getElementById('estado').className = 'desconectado';
+    function controlLED(accion) {
+      fetch('/led?accion=' + accion)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('estadoLED').innerHTML = 
+            accion === 'on' ? '💡 LED: Encendido' : '🌑 LED: Apagado';
+        });
+    }
+  </script>
+</body>
+</html>
