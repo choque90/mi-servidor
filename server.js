@@ -8,6 +8,9 @@ const io = socketio(server);
 
 app.use(express.json());
 
+// Estado del LED
+let comandoLED = 'LED_OFF';
+
 // Página web principal
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -23,6 +26,19 @@ app.get('/mensaje', (req, res) => {
   const texto = req.query.texto || '';
   io.emit('mensaje', texto);
   res.json({ ok: true, mensaje: texto });
+});
+
+// Ruta para controlar LED
+app.get('/led', (req, res) => {
+  const accion = req.query.accion || 'off';
+  comandoLED = accion === 'on' ? 'LED_ON' : 'LED_OFF';
+  io.emit('led', comandoLED);
+  res.json({ ok: true, comando: comandoLED });
+});
+
+// Ruta que lee el ESP32 cada segundo
+app.get('/comando', (req, res) => {
+  res.send(comandoLED);
 });
 
 io.on('connection', (socket) => {
