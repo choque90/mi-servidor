@@ -1,15 +1,14 @@
 const express = require('express');
 const http = require('http');
-const socketio = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
 
 app.use(express.json());
 
-// Estado del LED
+// Variables de estado
 let comandoLED = 'LED_OFF';
+let ultimoMensaje = '';
 
 // Página web principal
 app.get('/', (req, res) => {
@@ -24,7 +23,7 @@ app.get('/estado', (req, res) => {
 // Ruta para recibir mensaje desde la app
 app.get('/mensaje', (req, res) => {
   const texto = req.query.texto || '';
-  io.emit('mensaje', texto);
+  ultimoMensaje = texto;
   res.json({ ok: true, mensaje: texto });
 });
 
@@ -32,7 +31,6 @@ app.get('/mensaje', (req, res) => {
 app.get('/led', (req, res) => {
   const accion = req.query.accion || 'off';
   comandoLED = accion === 'on' ? 'LED_ON' : 'LED_OFF';
-  io.emit('led', comandoLED);
   res.json({ ok: true, comando: comandoLED });
 });
 
@@ -41,11 +39,9 @@ app.get('/comando', (req, res) => {
   res.send(comandoLED);
 });
 
-io.on('connection', (socket) => {
-  console.log('Cliente conectado');
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado');
-  });
+// Ruta para que la página web consulte el último estado
+app.get('/ultimoMensaje', (req, res) => {
+  res.json({ mensaje: ultimoMensaje, led: comandoLED });
 });
 
 const PORT = process.env.PORT || 8080;
